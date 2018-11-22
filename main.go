@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 type Config struct {
@@ -20,35 +21,39 @@ type Config struct {
 
 func modifyConfig(b []byte) ([]byte, error) {
 	// Decode JSON.
-	var c map[string]interface{}
+	var c specs.Spec
 	err := json.Unmarshal(b, &c)
 	if err != nil {
 		return nil, err
 	}
 
 	// Add required devices for libvirt.
-	c["linux"] = map[string]interface{}{
-		"devices": []map[string]interface{}{
-			map[string]interface{}{
-				"path":     "/dev/kvm",
-				"type":     "c",
-				"major":    10,
-				"minor":    232,
-				"fileMode": 432,
-				"uid":      0,
-				"gid":      104,
-			},
-			map[string]interface{}{
-				"path":     "/dev/net/tun",
-				"type":     "c",
-				"major":    10,
-				"minor":    200,
-				"fileMode": 438,
-				"uid":      0,
-				"gid":      104,
-			},
+	mode0660 := os.FileMode(0660)
+	mode0666 := os.FileMode(0666)
+	uid := uint32(0)
+	gid := uint32(104)
+	d := []specs.LinuxDevice{
+		specs.LinuxDevice{
+			Path:     "/dev/kvm",
+			Type:     "c",
+			Major:    10,
+			Minor:    232,
+			FileMode: &mode0660,
+			UID:      &uid,
+			GID:      &gid,
+		},
+		specs.LinuxDevice{
+			Path:     "/dev/net/tun",
+			Type:     "c",
+			Major:    10,
+			Minor:    200,
+			FileMode: &mode0666,
+			UID:      &uid,
+			GID:      &gid,
 		},
 	}
+
+	c.Linux.Devices = append(c.Linux.Devices, d...)
 
 	// Encode JSON.
 	res, err := json.Marshal(c)
@@ -119,13 +124,22 @@ func main() {
 
 		log.Println("Modifying config.json")
 		cf := filepath.Join(bundle, "config.json")
-		b, err := ioutil.ReadFile(cf)
+		config, err := ioutil.ReadFile(cf)
 		if err != nil {
 			log.Fatalf("Reading config file: %v\n", err)
 		}
 
-		var j map[string]interface{}
-		json.Unmarshal(b, &j)
+		newConfig, err := modifyConfig(config)
+		if err != nil {
+			log.Fatalf("Modifying config: %v\n", err)
+		}
+
+		// Overwrite config.
+		log.Println("Writing new config")
+		err = ioutil.WriteFile(cf, newConfig, 0600)
+		if err != nil {
+			log.Fatalf("Writing new config: %v\n", err)
+		}
 	}
 
 	log.Printf("Executing %s %s\n", binPath, sArgs)
