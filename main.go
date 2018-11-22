@@ -52,7 +52,12 @@ func modifyConfig(b []byte) ([]byte, error) {
 			GID:      &gid,
 		},
 	}
-
+	if c.Linux == nil {
+		c.Linux = &specs.Linux{}
+	}
+	if c.Linux.Devices == nil {
+		c.Linux.Devices = []specs.LinuxDevice{}
+	}
 	c.Linux.Devices = append(c.Linux.Devices, d...)
 
 	// Encode JSON.
