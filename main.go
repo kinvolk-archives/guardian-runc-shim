@@ -60,6 +60,17 @@ func modifyConfig(b []byte) ([]byte, error) {
 	}
 	c.Linux.Devices = append(c.Linux.Devices, d...)
 
+	// Make /sys mount read/write.
+	for _, m := range c.Mounts {
+		if m.Destination == "/sys" {
+			for i, o := range m.Options {
+				if o == "ro" {
+					m.Options[i] = "rw"
+				}
+			}
+		}
+	}
+
 	// Encode JSON.
 	res, err := json.Marshal(c)
 	if err != nil {
