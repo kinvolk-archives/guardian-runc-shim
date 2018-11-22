@@ -24,26 +24,14 @@ func TestModifyConfig(t *testing.T) {
 			continue
 		}
 
-		inJSON, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "in.json"))
+		in, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "in.json"))
 		if err != nil {
 			t.Fatalf("Reading test data: %v", err)
 		}
 
-		outJSON, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "out.json"))
+		out, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "out.json"))
 		if err != nil {
 			t.Fatalf("Reading test data: %v", err)
-		}
-
-		var in, out map[string]interface{}
-
-		err = json.Unmarshal(inJSON, &in)
-		if err != nil {
-			t.Fatal("Error parsing JSON")
-		}
-
-		err = json.Unmarshal(outJSON, &out)
-		if err != nil {
-			t.Fatal("Error parsing JSON")
 		}
 
 		res, err := modifyConfig(in)
@@ -51,8 +39,24 @@ func TestModifyConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if !reflect.DeepEqual(res, out) {
-			t.Fatalf("Invalid config returned after modification: got %v, want %v", res, out)
+		// Unmarshal JSON into structs so that we can check the result while ignoring whitespace
+		// and ordering differences.
+		var resStruct, outStruct map[string]interface{}
+
+		err = json.Unmarshal(res, &resStruct)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = json.Unmarshal(out, &outStruct)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Check result.
+		if !reflect.DeepEqual(resStruct, outStruct) {
+			t.Fatalf("Invalid config returned after modification: got \n%v, want \n%v",
+				resStruct, outStruct)
 		}
 	}
 }

@@ -18,16 +18,43 @@ type Config struct {
 	LogFile string `default:"/var/log/runc-wrapper"`
 }
 
-func modifyConfig(c map[string]interface{}) (map[string]interface{}, error) {
-	// Copy map so we don't alter the original.
-	res := make(map[string]interface{})
-	for k, v := range c {
-		res[k] = v
+func modifyConfig(b []byte) ([]byte, error) {
+	// Decode JSON.
+	var c map[string]interface{}
+	err := json.Unmarshal(b, &c)
+	if err != nil {
+		return nil, err
 	}
 
-	// Perform required modifications.
-	// res["ociVersion"] = "1.0.1"
-	// TODO Implement actual spec changes.
+	// Add required devices for libvirt.
+	c["linux"] = map[string]interface{}{
+		"devices": []map[string]interface{}{
+			map[string]interface{}{
+				"path":     "/dev/kvm",
+				"type":     "c",
+				"major":    10,
+				"minor":    232,
+				"fileMode": 432,
+				"uid":      0,
+				"gid":      104,
+			},
+			map[string]interface{}{
+				"path":     "/dev/net/tun",
+				"type":     "c",
+				"major":    10,
+				"minor":    200,
+				"fileMode": 438,
+				"uid":      0,
+				"gid":      104,
+			},
+		},
+	}
+
+	// Encode JSON.
+	res, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
 
 	return res, nil
 }
