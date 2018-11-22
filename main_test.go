@@ -3,41 +3,56 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"reflect"
 	"testing"
 )
 
+const TEST_DATA_DIR = "testdata"
+
 func TestModifyConfig(t *testing.T) {
 	// Read test data.
-	origJSON, err := ioutil.ReadFile(filepath.Join("testdata", "orig.json"))
+	dirs, err := ioutil.ReadDir(TEST_DATA_DIR)
 	if err != nil {
-		t.Fatalf("Reading test data: %v", err)
+		log.Fatalf("Listing test data directories: %v", err)
 	}
 
-	expectedJSON, err := ioutil.ReadFile(filepath.Join("testdata", "expected.json"))
-	if err != nil {
-		t.Fatalf("Reading test data: %v", err)
-	}
+	for _, d := range dirs {
+		// Skip files.
+		if !d.IsDir() {
+			continue
+		}
 
-	var orig, expected map[string]interface{}
+		inJSON, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "in.json"))
+		if err != nil {
+			t.Fatalf("Reading test data: %v", err)
+		}
 
-	err = json.Unmarshal(origJSON, &orig)
-	if err != nil {
-		t.Fatal("Error parsing original JSON")
-	}
+		outJSON, err := ioutil.ReadFile(filepath.Join(TEST_DATA_DIR, d.Name(), "out.json"))
+		if err != nil {
+			t.Fatalf("Reading test data: %v", err)
+		}
 
-	err = json.Unmarshal(expectedJSON, &expected)
-	if err != nil {
-		t.Fatal("Error parsing expected JSON")
-	}
+		var in, out map[string]interface{}
 
-	res, err := modifyConfig(orig)
-	if err != nil {
-		t.Fatal(err)
-	}
+		err = json.Unmarshal(inJSON, &in)
+		if err != nil {
+			t.Fatal("Error parsing JSON")
+		}
 
-	if !reflect.DeepEqual(res, expected) {
-		t.Fatalf("Invalid config returned after modification: got %v, want %v", res, expected)
+		err = json.Unmarshal(outJSON, &out)
+		if err != nil {
+			t.Fatal("Error parsing JSON")
+		}
+
+		res, err := modifyConfig(in)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !reflect.DeepEqual(res, out) {
+			t.Fatalf("Invalid config returned after modification: got %v, want %v", res, out)
+		}
 	}
 }
