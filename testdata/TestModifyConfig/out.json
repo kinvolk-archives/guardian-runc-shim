@@ -100,7 +100,7 @@
         "nosuid",
         "noexec",
         "nodev",
-        "ro"
+        "rw"
       ]
     },
     {
@@ -231,7 +231,13 @@
       },
       "blockIO": {
         "weight": 0
-      }
+      },
+      "devices": [
+        {
+          "allow": true,
+          "access": "rwm"
+        }
+      ]
     },
     "cgroupsPath": "garden/d31bb455-2596-4e12-732d-4407152bba59",
     "namespaces": [
@@ -2168,6 +2174,26 @@
       "/proc/timer_stats",
       "/proc/keys",
       "/sys/firmware"
+    ],
+    "devices": [
+      {
+        "path": "/dev/kvm",
+        "type": "c",
+        "major": 10,
+        "minor": 232,
+        "fileMode": 432,
+        "uid": 0,
+        "gid": 104
+      },
+      {
+        "path": "/dev/net/tun",
+        "type": "c",
+        "major": 10,
+        "minor": 200,
+        "fileMode": 438,
+        "uid": 0,
+        "gid": 104
+      }
     ]
   },
   "windows": {
