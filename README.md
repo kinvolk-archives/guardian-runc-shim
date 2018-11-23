@@ -5,7 +5,9 @@ A wrapper around runc which allows altering [spec files][1].
 The main use case for this wrapper is to be called by a [Concourse CI][2] worker (or - more
 specifically - [Guardian][3]) instead of the actual `runc` executable. The wrapper can then perform
 some desired customizations to the runc runtime spec file (namely `config.json`) and then call the
-"real" `runc` binary to continue the normal flow.
+"real" `runc` binary to continue the normal flow. Such customizations may be required when running
+Concourse tasks which need special access to the worker's host OS. The use case which brought to
+writing this wrapper is running KVM virtual machines inside Concourse pipelines.
 
 The wrapper calls `runc` using the `execve(2)` syscall without forking, so that the actual runc
 process replaces the wrapper and becomes a direct child of the process which invoked the wrapper.
