@@ -55,8 +55,20 @@ func TestModifyConfig(t *testing.T) {
 
 		// Check result.
 		if !reflect.DeepEqual(resStruct, outStruct) {
-			t.Fatalf("Invalid config returned after modification: got \n%v, want \n%v",
-				resStruct, outStruct)
+			prettyRes, err := json.MarshalIndent(resStruct, "", "  ")
+			if err != nil {
+				t.Fatal(err)
+			}
+			prettyOut, err := json.MarshalIndent(outStruct, "", "  ")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			t.Fatalf("Invalid config returned after modification:\n"+
+				"Got:\n%s"+
+				"\n==============================================\n"+
+				"Want:\n%s",
+				string(prettyRes), string(prettyOut))
 		}
 	}
 }
