@@ -71,6 +71,17 @@ func modifyConfig(b []byte) ([]byte, error) {
 		}
 	}
 
+	// Whitelist all devices.
+	if c.Linux.Resources == nil {
+		c.Linux.Resources = &specs.LinuxResources{}
+	}
+	if c.Linux.Resources.Devices == nil {
+		c.Linux.Resources.Devices = []specs.LinuxDeviceCgroup{}
+	}
+	c.Linux.Resources.Devices = []specs.LinuxDeviceCgroup{
+		specs.LinuxDeviceCgroup{Allow: true, Access: "rwm"},
+	}
+
 	// Encode JSON.
 	res, err := json.Marshal(c)
 	if err != nil {
