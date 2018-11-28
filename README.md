@@ -88,6 +88,17 @@ The shim does **not** log anything to stdout/stderr on purpose. This is because 
 on the stdout/stderr of the actual `runc` binary, which should be passed unchanged to the parent
 process. This behavior should not be modified.
 
+## Known Issues
+
+### Can't run non-privileged workloads
+
+It seems to be impossible to run non-privileged containers when using the shim. When Concourse
+attempts to start the container, the following error is returned from runc:
+
+```
+runc run: exit status 1: container_linux.go:348: starting container process caused "process_linux.go:402: container init caused \"process_linux.go:367: setting cgroup config for procHooks process caused \\\"failed to write a *:* rwm to devices.allow: write /sys/fs/cgroup/devices/system.slice/concourse-worker.service/garden/200e7e87-3af9-4a79-4ea5-5ca0364c6cc8/devices.allow: operation not permitted\\\"\""
+```
+
 [1]: https://github.com/opencontainers/runtime-spec/blob/master/config.md
 [2]: https://concourse-ci.org/
 [3]: https://github.com/cloudfoundry/guardian
