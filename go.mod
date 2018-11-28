@@ -1,4 +1,4 @@
-module github.com/kinvolk/runc-wrapper
+module github.com/kinvolk/guardian-runc-shim
 
 require (
 	github.com/kelseyhightower/envconfig v1.3.0
