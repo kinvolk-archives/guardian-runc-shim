@@ -16,7 +16,7 @@ import (
 
 type Config struct {
 	Binary  string `required:"true"`
-	LogFile string `default:"/var/log/runc-wrapper"`
+	LogFile string `default:"/var/log/guardian-runc-shim.log"`
 }
 
 func modifyConfig(b []byte) ([]byte, error) {
@@ -93,7 +93,7 @@ func modifyConfig(b []byte) ([]byte, error) {
 
 func main() {
 	var c Config
-	err := envconfig.Process("runc_wrapper", &c)
+	err := envconfig.Process("guardian_runc_shim", &c)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func main() {
 	log.Printf("Using runc binary at %s\n", binPath)
 
 	sArgs := strings.Join(os.Args[1:], " ")
-	log.Printf("Wrapper called with arguments: %s\n", sArgs)
+	log.Printf("guardian-runc-shim called with arguments: %s\n", sArgs)
 
 	// When true we need to modify config.json.
 	var modify bool
