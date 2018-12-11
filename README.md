@@ -4,8 +4,8 @@ A tiny shim for [Guardian][3] which allows altering [runC][7] [spec files][1].
 
 ## Why?
 
-[Concourse CI][2] runs tasks inside containers. It uses an API called [Garden][6] to accomplish,
-with a runC-based implementation called [Guardian][3] that ships with Concourse by default.
+[Concourse CI][2] runs tasks inside containers. It uses an API called [Garden][6] to accomplish
+this, with a runC-based implementation called [Guardian][3] that ships with Concourse by default.
 
 Concourse spawns containers with a specific [OCI spec][8] by default. This spec is quite rigid and
 could prevent certain operations from running in a Concourse task. One example is running
