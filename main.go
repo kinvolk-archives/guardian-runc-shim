@@ -109,7 +109,7 @@ func main() {
 	// Verify runc binary exists.
 	binPath, err := exec.LookPath(c.Binary)
 	if err != nil {
-		log.Fatalf("Binary '%s' does not exist\n", binPath)
+		log.Fatalf("Binary '%s' does not exist\n", c.Binary)
 	}
 	log.Printf("Using runc binary at %s\n", binPath)
 
