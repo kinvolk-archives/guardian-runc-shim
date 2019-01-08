@@ -2,6 +2,34 @@
 
 A tiny shim for [Guardian][3] which allows altering [runC][7] [spec files][1].
 
+## UPDATE: You Might Not Need This!
+
+There are ways to accomplish the same thing the code in this repository does without interfering
+with the way Concourse operates. For example, the following Concourse pipeline configuration can be
+used to modify a task's environment *from within a privileged container*, in this case in order to
+run a KVM virtual machine inside a Concourse task:
+
+```bash
+mkdir /tmp/devices-cgroup
+mount -t cgroup -o devices none /tmp/devices-cgroup
+echo 'c 10:232 rwm' > /tmp/devices-cgroup/system.slice/${concourse_systemd_unit}/$(hostname)/devices.allow
+mknod -m 0660 /dev/kvm c 10 232
+chown root:kvm /dev/kvm
+
+mkdir /dev/net
+mknod -m 0600 /dev/net/tun c 10 200
+
+mount -o rw,remount /sys
+
+service libvirtd start
+service virtlogd start
+```
+
+It is more stable, secure and convenient to keep the required customizations within the pipeline
+configuration itself. If, however, the customization you require can't be accomplished by altering
+the pipeline you may benefit from using this code (with relevant modifications) to build a shim
+which can perform your desired changes whenever a Concourse task runs.
+
 ## Why?
 
 [Concourse CI][2] runs tasks inside containers. It uses an API called [Garden][6] to accomplish
